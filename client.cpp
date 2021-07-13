@@ -20,9 +20,19 @@ int main()
 	}
 	while (true)
 	{
-		string action;
+		string action , wall_dir="", wall_pos= "";
 		cout << "What do you wanna do?\n";
-		getline(cin, action);
+		cin >> action;
+		if (action == "wall")
+		{
+			cout << "What is the direction of the wall??\nwrite 'h' for horizontal and 'v' for vertical\n";
+			cin >> wall_dir;
+			cout << "what is the position of the wall?\n";
+			cin >> wall_pos;
+			Params params{ { wall_dir , wall_pos}};
+			auto res = cil.Post("/wall", params);
+			cout << res->body << endl;
+		}
 		if (auto res = cil.Get(command(action)))
 		{
 			if(res -> status == 200)
