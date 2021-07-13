@@ -15,10 +15,13 @@ string print_board();
 class player
 {
 public:
+	string go(char);
+	void set_place(int);
 	void set_name(char);
 	bool move(char);
 	void put_wall(char , int);
 private:
+	int place=-1;
 	char name;
 };
 player *alls;
@@ -43,18 +46,24 @@ int main()
     	cout << players_in_game << " " << players_count << endl;
     	if(players_in_game == players_count)
     	{
-    		cout << "completed\n";
     		build_board();
     		alls = new player[players_count];
     		res.set_content( "Great\nGame created\n", "text/plain");
-    		cout << "created\n";
+    		int place[4] ={0,10,120,110};
+    		char namee = 65;
+    		for (int q=0; q<players_count; q++)
+    		{
+    			alls[q].set_name(namee+q);
+    			alls[q].set_place(place[q]);
+    		}
+    		res.set_content("Here is the board\n" + print_board(), "text/plain");
     	}
-  	});
-  	svr.Get("/print", [](const Request& req, Response& res) {
-    	res.set_content(print_board(), "text/plain" ); 
   	});
   	svr.Get("/help", [](const Request& req, Response& res) {
     	res.set_content(menu, "text/html" ); 
+  	});
+  	svr.Get("/print", [](const Request& req, Response& res) {
+    	res.set_content(print_board(), "text/plain");
   	});
   	svr.Post("/wall", [&](const Request &req, Response &res, const ContentReader &content_reader)
   	{
@@ -62,8 +71,17 @@ int main()
       	content_reader([&](const char *data, size_t data_length) {
         body.append(data, data_length);
         alls[0].put_wall(body[0], str2int(body.substr(2)));
-        cout << "put wall complete\n";
         res.set_content(print_board(), "text/plain");
+        return true;
+      	});});
+      	svr.Post("/move", [&](const Request &req, Response &res, const ContentReader &content_reader)
+  	{
+  	string body;
+      	content_reader([&](const char *data, size_t data_length) {
+        body.append(data, data_length);
+        cout << body << endl;
+        string result = alls[str2int(body.substr(0,1))-1].go(body[4]);
+        res.set_content(  result, "text/plain");
         return true;
       	});});
   	svr.listen("localhost", 8080);
@@ -99,8 +117,6 @@ string print_board()
 }
 void player::put_wall(char dir, int pos)
 {
-	printf( "dir: %c   pos: %d", dir, pos);
-	printf("pos: %d\n", pos);
 	if (pos < 121 && pos > -1) 
 	{theboard[pos/11][pos%11] = *"W";
 		if (dir == *"h")
@@ -117,7 +133,6 @@ void player::put_wall(char dir, int pos)
 }
 long long str2int(string num )
 {
-	cout << "num: " << num << endl;
     long long k = 1;
     long long n= num.size();
     // For handling negative numbers
@@ -153,4 +168,54 @@ string int2str(int num)
 void player::set_name(char n)
 {
 	name = n;
+}
+void player::set_place(int p)
+{
+	theboard[place/11][place%11] = *"O";
+	place = p;
+	theboard[place/11][place%11] = name;
+}
+string player::go(char dirc)
+{
+	cout << name << " " << dirc << endl;
+	theboard[place/11][place%11] = *"O";
+	if(dirc == *"u")
+	{
+		if( place < 11)
+		{
+			return "fail";
+		}
+		place -= 11;
+	}
+	else if(dirc == *"d")
+	{
+		if( place > 109)
+		{
+			return "fail";
+		}
+		place += 11;
+	}
+	else if(dirc == *"r")
+	{
+		if( place%11 == 10)
+		{
+			return "fail";
+		}
+		place ++;
+	}
+	else if(dirc == *"l")
+	{
+		if( place%11 == 0)
+		{
+			return "fail";
+		}
+		place --;
+	}
+	else
+	{
+		return "fail";
+	}
+	cout << "new place: " << place << endl;
+	theboard[place/11][place%11] = name;
+	return "done";
 }

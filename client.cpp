@@ -5,6 +5,7 @@ using namespace httplib;
 char* space2slash(string);
 char* command(string);
 long long str2int(string );
+string int2str(int);
 int main()
 {
 	Client cil("localhost", 8080);
@@ -36,7 +37,7 @@ int main()
 		auto res = cil.Get("/start");
 		cout << res->body << endl;
 	}
-	cout << "Here is the positions of the cells:\n";
+	cout << "And here is the positions of the cells:\n";
 	cout << cil.Get("/pos")->body << endl;
 	int it=0;
 	while (true)
@@ -58,7 +59,21 @@ int main()
 		}
 		else if (action == "move")
 		{
-			
+			string mode = "fail";
+			while (mode == "fail")
+			{
+				cout << "Where do you wanna go?\n'u' for up and 'd' for down\n'r' for right and 'l' for left\n";
+				string dirc ;
+				cin >> dirc;
+				Params mp{ {int2str(it) , dirc}};
+				auto res = cil.Post("/move", mp);
+				if(res->body == "fail")
+				{
+					cout << "You can't go there!\n";
+				}
+				mode = res->body;
+			}
+			cout << cil.Get("/print")->body << endl;
 		}
 		else
 		{
@@ -84,4 +99,20 @@ long long str2int(string num )
         ans = ans*10 + ((long long)num[r] - 48);
     }
     return ans*k;
+}
+string int2str(int num)
+{
+	string ans;
+	while( num>0)
+	{
+		int a = num%10;
+		ans = (char)(a+48) + ans;
+		num /= 10;
+	}
+	if (ans.size() == 0){ans = "0";}
+	while(ans.size() < 3)
+	{
+		ans += " ";
+	}
+	return ans;
 }
