@@ -36,6 +36,8 @@ int main()
 		auto res = cil.Get("/start");
 		cout << res->body << endl;
 	}
+	cout << "Here is the positions of the cells:\n";
+	cout << cil.Get("/pos")->body << endl;
 	int it=0;
 	while (true)
 	{
@@ -54,41 +56,16 @@ int main()
 			auto res = cil.Post("/wall", params);
 			cout << res->body << endl;
 		}
-		if (auto res = cil.Get(command(action)))
+		else if (action == "move")
 		{
-			if(res -> status == 200)
-			{
-				cout << res->body << endl;
-			}
-			else
-			{
-				auto err = res.error();
-			}
-		}
-	}
-}
-char* command(string text)
-{
-	text = " "+text;
-	int n = text.size() ;
-	char* ans = new char[n];
-	for (int a=0; a< n; a++)
-	{
-		ans[a] = *"";
-	}
-	for (int a=0; a< n; a++)
-	{
-		if(text[a] == *" ")
-		{
-			ans[a] = *"/";
+			
 		}
 		else
 		{
-			ans[a] = text[a];
+			cout << "You just can move or put a wall!\nTry again\n";
+			it--;
 		}
 	}
-	ans[n] = *"";
-	return ans;
 }
 long long str2int(string num )
 {
