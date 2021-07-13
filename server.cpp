@@ -5,29 +5,53 @@ using namespace std;
 string menu = "\t\t   Welcome to CORRIDOR game\n\t\tHere is the help for this game:\n\t\t   'play' to start the game\n\t\t   'print' to see the board\n\t\t     'wall' to put a wall\n\t\t'pos' to see positions of cells\n";
 string int2str(int );
 long long str2int(string );
-
-class board
+char **theboard = new char*[11];
+bool is_started = false;
+int players_count = 0;
+int players_in_game = 0;
+string positions = "";
+void build_board();
+string print_board();
+class player
 {
 public:
-	board();
-	string print_board();
-	string positions;
-	void put_wall( char, int);
+	void set_name(char);
+	bool move(char);
+	void put_wall(char , int);
 private:
-	char **theboard = new char*[11];
+	char name;
 };
+player *alls;
 int main()
 {
 	Server svr;
-	board gboard;
-  	svr.Get("/play", [](const Request& req, Response& res) {
-    	res.set_content("That's greaaaat!!!!!", "text/html");
+  	svr.Post("/play", [&](const Request &req, Response &res, const ContentReader &content_reader)
+  	{
+  	string body;
+      	content_reader([&](const char *data, size_t data_length) {
+        body.append(data, data_length);
+        cout << "body: " << body << endl;
+        players_count = str2int(body.substr(1));
+        players_in_game = 0;
+        return true;
+      	});});
+  	svr.Get("/pos", [](const Request& req, Response& res) {
+    	res.set_content( positions ,"text/html");
   	});
-  	svr.Get("/pos", [&gboard](const Request& req, Response& res) {
-    	res.set_content( gboard.positions ,"text/html");
+  	svr.Get("/start", [](const Request& req, Response& res) {
+    	players_in_game ++;
+    	cout << players_in_game << " " << players_count << endl;
+    	if(players_in_game == players_count)
+    	{
+    		cout << "completed\n";
+    		build_board();
+    		alls = new player[players_count];
+    		res.set_content( "Great\nGame created\n", "text/plain");
+    		cout << "created\n";
+    	}
   	});
-  	svr.Get("/print", [&gboard](const Request& req, Response& res) {
-    	res.set_content(gboard.print_board(), "text/plain" ); 
+  	svr.Get("/print", [](const Request& req, Response& res) {
+    	res.set_content(print_board(), "text/plain" ); 
   	});
   	svr.Get("/help", [](const Request& req, Response& res) {
     	res.set_content(menu, "text/html" ); 
@@ -37,14 +61,14 @@ int main()
   	string body;
       	content_reader([&](const char *data, size_t data_length) {
         body.append(data, data_length);
-        gboard.put_wall(body[0], str2int(body.substr(2)));
+        alls[0].put_wall(body[0], str2int(body.substr(2)));
         cout << "put wall complete\n";
-        res.set_content(gboard.print_board(), "text/plain");
+        res.set_content(print_board(), "text/plain");
         return true;
       	});});
   	svr.listen("localhost", 8080);
 }
-board::board()
+void build_board()
 {
 	for (int a=0; a<11; a++)
 	{
@@ -60,7 +84,7 @@ board::board()
 		positions = positions + "\n";
 	}
 }
-string board::print_board()
+string print_board()
 {
 	string ans = "";
 	for(int a=0; a<11; a++)
@@ -73,7 +97,7 @@ string board::print_board()
 	}
 	return ans;
 }
-void board::put_wall(char dir, int pos)
+void player::put_wall(char dir, int pos)
 {
 	printf( "dir: %c   pos: %d", dir, pos);
 	printf("pos: %d\n", pos);
@@ -124,6 +148,9 @@ string int2str(int num)
 	{
 		ans += " ";
 	}
-	cout << ans << endl;
 	return ans;
+}
+void player::set_name(char n)
+{
+	name = n;
 }
