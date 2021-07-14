@@ -12,15 +12,17 @@ int players_in_game = 0;
 string positions = "";
 void build_board();
 string print_board();
+const int win_place = 60;
+string is_finish();
 class player
 {
 public:
-	
 	string go(char);
 	void set_place(int);
 	void set_name(char);
 	bool move(char);
 	void put_wall(char , int);
+	int get_place();
 private:
 	int place=-1;
 	char name;
@@ -41,6 +43,9 @@ int main()
   	svr.Get("/pos", [](const Request& req, Response& res) {
     	res.set_content( positions ,"text/html");
   	});
+  	svr.Get("/finish", [](const Request& req, Response& res) {
+    	res.set_content( is_finish() ,"text/html");
+  	});
   	svr.Get("/start", [](const Request& req, Response& res) {
     	players_in_game ++;
     	if(players_in_game == players_count)
@@ -48,7 +53,7 @@ int main()
     		build_board();
     		alls = new player[players_count];
     		res.set_content( "Great\nGame created\n", "text/plain");
-    		int place[4] ={0,10,120,110};
+    		int place[4] ={0,120,10,110};
     		char namee = 65;
     		for (int q=0; q<players_count; q++)
     		{
@@ -215,4 +220,20 @@ string player::go(char dirc)
 	theboard[place/11][place%11] = name;
 	return "done";
 }
-
+int player::get_place()
+{
+	return place;
+}
+string is_finish()
+{
+	string ans = "N";
+	for (int q=0; q< players_count; q++)
+	{
+		if (alls[q].get_place() == win_place)
+		{
+			ans = "Player" + int2str(q+1);
+		}
+		break;
+	}
+	return ans;
+}

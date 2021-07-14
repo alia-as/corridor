@@ -40,7 +40,8 @@ int main()
 	cout << "And here is the positions of the cells:\n";
 	cout << cil.Get("/pos")->body << endl;
 	int it=0;
-	while (true)
+	string winner = "N";
+	while (winner == "N")
 	{
 		it++;
 		if(it==p_c+1){ it=1;};
@@ -80,7 +81,9 @@ int main()
 			cout << "You just can move or put a wall!\nTry again\n";
 			it--;
 		}
+		winner = cil.Get("/finish")->body;
 	}
+	cout << "\t\t\tHooooooraaaaaaay\n\t\t\t    Congrates\n\t\t    " << winner << " has won the game\n"; 
 }
 long long str2int(string num )
 {
