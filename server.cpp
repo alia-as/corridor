@@ -2,7 +2,7 @@
 using namespace httplib;
 using namespace std;
 
-string menu = "\t\t   Welcome to CORRIDOR game\n\t\tHere is the help for this game:\n\t\t   'play' to start the game\n\t\t   'print' to see the board\n\t\t     'wall' to put a wall\n\t\t'pos' to see positions of cells\n";
+string menu = "\t\t   Welcome to CORRIDOR game\n\t\t   After you start the game\n\t\twrite 'move' to move your player\n\t\t And write 'wall' to put a wall\n";
 string int2str(int );
 long long str2int(string );
 char **theboard = new char*[11];
@@ -15,6 +15,7 @@ string print_board();
 class player
 {
 public:
+	
 	string go(char);
 	void set_place(int);
 	void set_name(char);
@@ -33,7 +34,6 @@ int main()
   	string body;
       	content_reader([&](const char *data, size_t data_length) {
         body.append(data, data_length);
-        cout << "body: " << body << endl;
         players_count = str2int(body.substr(1));
         players_in_game = 0;
         return true;
@@ -43,7 +43,6 @@ int main()
   	});
   	svr.Get("/start", [](const Request& req, Response& res) {
     	players_in_game ++;
-    	cout << players_in_game << " " << players_count << endl;
     	if(players_in_game == players_count)
     	{
     		build_board();
@@ -79,7 +78,6 @@ int main()
   	string body;
       	content_reader([&](const char *data, size_t data_length) {
         body.append(data, data_length);
-        cout << body << endl;
         string result = alls[str2int(body.substr(0,1))-1].go(body[4]);
         res.set_content(  result, "text/plain");
         return true;
@@ -119,7 +117,7 @@ void player::put_wall(char dir, int pos)
 {
 	if (pos < 121 && pos > -1) 
 	{theboard[pos/11][pos%11] = *"W";
-		if (dir == *"h")
+		if (dir == *"v")
 		{
 			if (pos>10) {theboard[pos/11-1][pos%11] = *"W";}
 			if (pos<110) {theboard[pos/11+1][pos%11] = *"W";}
@@ -177,11 +175,10 @@ void player::set_place(int p)
 }
 string player::go(char dirc)
 {
-	cout << name << " " << dirc << endl;
 	theboard[place/11][place%11] = *"O";
 	if(dirc == *"u")
 	{
-		if( place < 11)
+		if( place < 11 || theboard[(place-11)/11][(place-11)%11] == *"W")
 		{
 			return "fail";
 		}
@@ -189,7 +186,7 @@ string player::go(char dirc)
 	}
 	else if(dirc == *"d")
 	{
-		if( place > 109)
+		if( place > 109 || theboard[(place+11)/11][(place+11)%11] == *"W")
 		{
 			return "fail";
 		}
@@ -197,7 +194,7 @@ string player::go(char dirc)
 	}
 	else if(dirc == *"r")
 	{
-		if( place%11 == 10)
+		if( place%11 == 10 || theboard[(place+1)/11][(place+1)%11] == *"W")
 		{
 			return "fail";
 		}
@@ -205,7 +202,7 @@ string player::go(char dirc)
 	}
 	else if(dirc == *"l")
 	{
-		if( place%11 == 0)
+		if( place%11 == 0 || theboard[(place-1)/11][(place-1)%11] == *"W")
 		{
 			return "fail";
 		}
@@ -215,7 +212,7 @@ string player::go(char dirc)
 	{
 		return "fail";
 	}
-	cout << "new place: " << place << endl;
 	theboard[place/11][place%11] = name;
 	return "done";
 }
+
