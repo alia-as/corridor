@@ -20,9 +20,20 @@ int main()
 			auto err = res.error();
 		}
 	}
-	cout << "how many players we have?\n";
-	string n;
-	cin >> n;
+	string n = "1";
+	while ( n != "2" && n != "3" && n != "4")
+	{
+		cout << "how many players we have?\n";
+		cin >> n;
+		if (n == "1")
+		{
+			cout << "You can't play with yourself!!!\n";
+		}
+		if (n != "2" && n != "3" && n != "4")
+		{
+			cout << "We can have 2 or 3 or 4 players!\n";
+		}
+	}
 	Params pl{ { "", n}};
 	cil.Post("/play", pl);
 	int p_c = str2int(n);
@@ -50,13 +61,18 @@ int main()
 		cin >> action;
 		if (action == "wall")
 		{
-			cout << "What is the direction of the wall??\nwrite 'h' for horizontal and 'v' for vertical\n";
-			cin >> wall_dir;
-			cout << "what is the position of the wall?\n";
-			cin >> wall_pos;
-			Params params{ { wall_dir , wall_pos}};
-			auto res = cil.Post("/wall", params);
-			cout << res->body << endl;
+			string wallmode = "You can't put a wall here\n";
+			while (wallmode == "You can't put a wall here\n")
+			{
+				cout << "What is the direction of the wall??\nwrite 'h' for horizontal and 'v' for vertical\n";
+				cin >> wall_dir;
+				cout << "what is the position of the wall?\n";
+				cin >> wall_pos;
+				Params params{ { wall_dir , wall_pos}};
+				auto res = cil.Post("/wall", params);
+				wallmode = res->body;
+				cout << wallmode << endl;
+			}
 		}
 		else if (action == "move")
 		{
