@@ -5,6 +5,7 @@ using namespace httplib;
 char* space2slash(string);
 char* command(string);
 long long str2int(string );
+string id;
 string int2str(int);
 int main()
 {
@@ -20,95 +21,86 @@ int main()
 			auto err = res.error();
 		}
 	}
-	string n = "1";
-	while ( n != "2" && n != "3" && n != "4")
+	string ready = "n";
+	string resp1 = cil.Get("/start")->body;
+	while(cil.Post("/play",ready, "text/plain")->body == "no")
 	{
-		cout << "how many players we have?\n";
-		cin >> n;
-		if (n == "1")
+		cout << resp1;
+		if(resp1 != "Maximum players exceed!\n")
 		{
-			cout << "You can't play with yourself!!!\n";
+			id = resp1.substr(6,1);
+			cin >> ready;
 		}
-		if (n != "2" && n != "3" && n != "4")
+		else
 		{
-			cout << "We can have 2 or 3 or 4 players!\n";
+			return 0;
 		}
 	}
-	Params pl{ { "", n}};
-	cil.Post("/play", pl);
-	int p_c = str2int(n);
-	for (int p=1; p <=  p_c; p++)
+	cout << "Waiting for other players...\n";
+	while(cil.Get("/is-started")->body == "no")
 	{
-		string mode="";
-		while(mode != "y")
-		{
-			printf("Player%d, Are you ready (type 'y' for yes)? ",p);
-			cin >> mode;
-		}
-		auto res = cil.Get("/start");
-		cout << res->body << endl;
 	}
 	cout << "Here is the board\n";
 	cout << cil.Get("/print")->body << endl;
 	cout << "And here is the positions of the cells:\n";
 	cout << cil.Get("/pos")->body << endl;
-	int it=0;
 	string winner = "N";
+	int p_c = str2int(cil.Get("/players")->body);
 	while (winner == "N")
 	{
-		it++;
-		if(it==p_c+1){ it=1;};
-		string action , wall_dir="", wall_pos= "";
-		cout << "Player" << it << " What do you wanna do?\n";
-		cin >> action;
-		if (action == "wall")
+		if( cil.Post("/isme", id, "text/plain")->body == "yes")
 		{
-			string wallmode = "You can't put a wall here\n";
-			while (wallmode.substr(0,3) == "You")
+			cout << "Player" << id << ", What do you wanna do?\n";
+			string action , wall_dir="", wall_pos= "";
+			cin >> action;
+			if (action == "wall")
 			{
-				while(wall_dir != "v" && wall_dir != "h")
+				string wallmode = "You can't put a wall here\n";
+				while (wallmode.substr(0,3) == "You")
 				{
-					cout << "What is the direction of the wall??\nwrite 'h' for horizontal and 'v' for vertical\n";
-					cin >> wall_dir;
-					if (wall_dir != "v" && wall_dir != "h")
+					while(wall_dir != "v" && wall_dir != "h")
 					{
-						cout << "This is not a direction :(\n";
+						cout << "What is the direction of the wall??\nwrite 'h' for horizontal and 'v' for vertical\n";
+						cin >> wall_dir;
+						if (wall_dir != "v" && wall_dir != "h")
+						{
+							cout << "This is not a direction :(\n";
+						}
 					}
+					cout << "what is the position of the wall?\n";
+					cin >> wall_pos;
+					Params params{ { wall_dir , wall_pos}};
+					auto res = cil.Post("/wall", params);
+					wallmode = res->body;
+					cout << wallmode << endl;
 				}
-				cout << "what is the position of the wall?\n";
-				cin >> wall_pos;
-				Params params{ { wall_dir , wall_pos}};
-				auto res = cil.Post("/wall", params);
-				wallmode = res->body;
-				cout << wallmode << endl;
+				cout << cil.Get("/print")->body << endl;
+				
 			}
-			cout << cil.Get("/print")->body << endl;
-			
-		}
-		else if (action == "move")
-		{
-			string mode = "fail";
-			while (mode == "fail")
+			else if (action == "move")
 			{
-				cout << "Where do you wanna go?\n'u' for up and 'd' for down\n'r' for right and 'l' for left\n";
-				string dirc ;
-				cin >> dirc;
-				Params mp{ {int2str(it) , dirc}};
-				auto res = cil.Post("/move", mp);
-				if(res->body == "fail")
+				string mode = "fail";
+				while (mode == "fail")
 				{
-					cout << "You can't go there!\n";
+					cout << "Where do you wanna go?\n'u' for up and 'd' for down\n'r' for right and 'l' for left\n";
+					string dirc ;
+					cin >> dirc;
+					Params mp{ {id , dirc}};
+					auto res = cil.Post("/move", mp);
+					if(res->body == "fail")
+					{
+						cout << "You can't go there!\n";
+					}
+					mode = res->body;
 				}
-				mode = res->body;
+				cout << cil.Get("/print")->body << endl;
 			}
-			cout << cil.Get("/print")->body << endl;
+			else
+			{
+				cout << "You just can move or put a wall!\nTry again\n";
+			}
+			winner = cil.Get("/finish")->body;
 		}
-		else
-		{
-			cout << "You just can move or put a wall!\nTry again\n";
-			it--;
-		}
-		winner = cil.Get("/finish")->body;
 	}
 	cout << "\t\t\tHooooooraaaaaaay\n\t\t\t    Congrates\n\t\t    " << winner << " has won the game\n"; 
 }

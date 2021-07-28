@@ -8,6 +8,8 @@ public:
 	string positions = "";
 	void build_board();
 	string print_board();
+private:
+	bool builded = false;
 };
 string board::print_board()
 {
@@ -24,18 +26,22 @@ string board::print_board()
 }
 void board::build_board()
 {
-	for (int a=0; a<11; a++)
+	if(!builded)
 	{
-		theboard[a] = new char[11];
-	}
-	for(int a=0; a<11; a++)
-	{
-		for(int b=0; b<11; b++)
+		for (int a=0; a<11; a++)
 		{
-			theboard[a][b] = *"O";
-			positions = positions + int2str(11*a + b) + " ";
+			theboard[a] = new char[11];
 		}
-		positions = positions + "\n";
+		for(int a=0; a<11; a++)
+		{
+			for(int b=0; b<11; b++)
+			{
+				theboard[a][b] = *"O";
+				positions = positions + int2str(11*a + b) + " ";
+			}
+			positions = positions + "\n";
+		}
+		builded  = true;
 	}
 }
 string int2str(int num)
