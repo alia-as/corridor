@@ -96,42 +96,86 @@ string player::go(char** theboard, char dirc)
 	theboard[place/11][place%11] = *"O";
 	if(dirc == *"u")
 	{
-		if( place < 11 || theboard[(place-11)/11][(place-11)%11] == *"W")
+		if( place < 11 || theboard[(place-11)/11][(place-11)%11] != *"O")
 		{
-			return "fail";
+			if(place<11)
+			{
+				return "You can't go beyond the board!!!\n";
+			}
+			else if(theboard[(place-11)/11][(place-11)%11] == *"W")
+			{
+				return "There is a wall there!\n";
+			}
+			else
+			{
+				return "There is someone there\n";
+			}
 		}
 		place -= 11;
 	}
 	else if(dirc == *"d")
 	{
-		if( place > 109 || theboard[(place+11)/11][(place+11)%11] == *"W")
+		if( place > 109 || theboard[(place+11)/11][(place+11)%11] != *"O")
 		{
-			return "fail";
+			if(place>109)
+			{
+				return "You can't go beyond the board!!!\n";
+			}
+			else if(theboard[(place+11)/11][(place+11)%11] == *"W")
+			{
+				return "There is a wall there!\n";
+			}
+			else
+			{
+				return "There is someone there\n";
+			}
 		}
 		place += 11;
 	}
 	else if(dirc == *"r")
 	{
-		if( place%11 == 10 || theboard[(place+1)/11][(place+1)%11] == *"W")
+		if( place%11 == 10 || theboard[(place+1)/11][(place+1)%11] != *"O")
 		{
-			return "fail";
+			if(place%11 == 10)
+			{
+				return "You can't go beyond the board!!!\n";
+			}
+			else if(theboard[(place+1)/11][(place+11)%11] == *"W")
+			{
+				return "There is a wall there!\n";
+			}
+			else
+			{
+				return "There is someone there\n";
+			}
 		}
 		place ++;
 	}
 	else if(dirc == *"l")
 	{
-		if( place%11 == 0 || theboard[(place-1)/11][(place-1)%11] == *"W")
+		if( place%11 == 0 || theboard[(place-1)/11][(place-1)%11] != *"O")
 		{
-			return "fail";
+			if(place%11 == 0)
+			{
+				return "You can't go beyond the board!!!\n";
+			}
+			else if(theboard[(place-1)/11][(place-1)%11] == *"W")
+			{
+				return "There is a wall there!\n";
+			}
+			else
+			{
+				return "There is someone there\n";
+			}
 		}
 		place --;
 	}
 	else
 	{
-		return "fail";
+		return "We don't have this direction!\n";
 	}
 	theboard[place/11][place%11] = name;
-	return "done";
+	return "done\n";
 }
 int player::get_place()
 {

@@ -46,10 +46,15 @@ int main()
 	cout << cil.Get("/pos")->body << endl;
 	string winner = "N";
 	int p_c = str2int(cil.Get("/players")->body);
+	string turn2= "";
 	while (winner == "N")
 	{
-		if( cil.Post("/isme", id, "text/plain")->body == "yes")
+		string turn = cil.Post("/isme", id, "text/plain")->body;
+		winner = cil.Get("/finish")->body;
+		if( turn == "yes" && winner == "N")
 		{
+			cout << "Here is the board\n";
+			cout << cil.Get("/print")->body << endl;
 			cout << "Player" << id << ", What do you wanna do?\n";
 			string action , wall_dir="", wall_pos= "";
 			cin >> action;
@@ -79,17 +84,14 @@ int main()
 			else if (action == "move")
 			{
 				string mode = "fail";
-				while (mode == "fail")
+				while (mode != "done\n")
 				{
 					cout << "Where do you wanna go?\n'u' for up and 'd' for down\n'r' for right and 'l' for left\n";
 					string dirc ;
 					cin >> dirc;
 					auto res = cil.Post("/move", id+dirc, "text/plain");
-					if(res->body == "fail")
-					{
-						cout << "You can't go there!\n";
-					}
 					mode = res->body;
+					cout << mode ;
 				}
 				cout << cil.Get("/print")->body << endl;
 			}
@@ -97,10 +99,23 @@ int main()
 			{
 				cout << "You just can move or put a wall!\nTry again\n";
 			}
-			winner = cil.Get("/finish")->body;
 		}
+		else if(turn != turn2 && winner == "N")
+		{
+			cout << "Waiting for player"<< turn << endl;
+		}
+		winner = cil.Get("/finish")->body;
+		turn2 = turn;
 	}
-	cout << "\t\t\tHooooooraaaaaaay\n\t\t\t    Congrates\n\t\t    " << winner << " has won the game\n"; 
+	if (winner.substr(6,1) == id)
+	{
+		cout << "\t\t\tHooooooraaaaaaay\n\t\t\t    Congrates\n\t\t       You won the game🥳🥳🥳\n";
+	}
+	else
+	{
+		cout << "Aahh...  Maybe next time you win :)\n";
+		cout << winner << "has won the game\n"; 
+	}
 }
 long long str2int(string num )
 {

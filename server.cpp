@@ -31,6 +31,7 @@ int main()
 			cout << "We can have 2 or 3 or 4 players!\n";
 		}
 	}
+	cout << "Great!\nThe server is running now...\n";
 	players_count = n;
 	board gboard;
 	Server svr;
@@ -61,12 +62,15 @@ int main()
         }
         else
         {
-        	res.set_content("no", "text/plain");
+        	res.set_content(int2str(turn), "text/plain");
         }
         return true;
       	});});
   	svr.Get("/pos", [&gboard](const Request& req, Response& res) {
     	res.set_content( gboard.positions ,"text/plain");
+  	});
+  	svr.Get("/stop", [&](const Request& req, Response& res) {
+    	svr.stop();
   	});
   	svr.Get("/is-started", [&gboard](const Request& req, Response& res) {
     	if(players_in_game == players_count)
@@ -98,11 +102,11 @@ int main()
   	temp++;
   	if(temp > players_count)
   	{
-  		res.set_content("Maximum players exceed!\n" , "text/plain");
+  		res.set_content("Oops... Sorry!!!\nMaximum players exceed!\n" , "text/plain");
   	}
   	else
   	{
-  		res.set_content( "player"+ int2str(temp)+", Are you ready (type 'y' for yes)?" , "text/plain");
+  		res.set_content( "player"+ int2str(temp)+", Are you ready (type 'y' for yes)?  " , "text/plain");
   	}
     	
   	});
@@ -117,10 +121,13 @@ int main()
   	string body;
       	content_reader([&](const char *data, size_t data_length) {
         body.append(data, data_length);
-        auto wallres = alls[0].put_wall(gboard.theboard, body[0], str2int(body.substr(2)));
+        auto wallres = alls[0].put_wall(gboard.theboard, body[0], str2int(body.substr(1)));
         res.set_content(wallres, "text/plain");
-        turn++;
-        if(turn > players_count){ turn=1;}
+        if(wallres != "You can't put a wall here\n")
+        {
+		turn++;
+		if(turn > players_count){ turn=1;}
+        }
         return true;
       	});});
       	svr.Post("/move", [&](const Request &req, Response &res, const ContentReader &content_reader)
@@ -128,11 +135,13 @@ int main()
   	string body;
       	content_reader([&](const char *data, size_t data_length) {
         body.append(data, data_length);
-        cout << "body: " << body << endl;
         string result = alls[str2int(body.substr(0,1))-1].go(gboard.theboard, body[1]);
         res.set_content(  result, "text/plain");
-        turn++;
-        if(turn > players_count){ turn=1;}
+        if(result == "done\n")
+        {
+		turn++;
+		if(turn > players_count){ turn=1;}
+        }
         return true;
       	});});
   	svr.listen("localhost", 8080);
