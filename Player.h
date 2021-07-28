@@ -6,18 +6,22 @@ public:
 	string go(char**,char);
 	void set_place(char**,int);
 	void set_name(char);
-	bool put_wall(char**,char , int);
+	string put_wall(char**,char , int);
 	int get_place();
 private:
 	int place=-1;
 	char name;
 };
-bool player::put_wall(char** theboard, char dir, int pos)
+string player::put_wall(char** theboard, char dir, int pos)
 {
 	if (pos < 121 && pos > -1 && theboard[pos/11][pos%11] == *"O") 
 	{
 		if (dir == *"v")
 		{
+			if( pos==60 || pos-11 == 60 || pos+11 == 60)
+			{
+				return "You can't put a wall here\nThe center of board must be empty cause it is the winning place!!";
+			}
 			if (pos>10 && theboard[pos/11-1][pos%11] == *"O" 
 			&& pos<110 && theboard[pos/11+1][pos%11] == *"O") 
 			{
@@ -25,10 +29,24 @@ bool player::put_wall(char** theboard, char dir, int pos)
 				theboard[pos/11-1][pos%11] = *"W";
 				theboard[pos/11+1][pos%11] = *"W";
 			}
-			else {return false;}
+			else
+			{
+				if( pos<=10 || pos >= 110)
+				{
+					return "You can't put a wall here\nWalls must be completely in the board!";
+				}
+				else
+				{
+					return "You can't put a wall here\nYou just can put walls in empty cells!";
+				}
+			}
 		}
 		else
 		{
+			if( pos==60 || pos-1 == 60 || pos+1 == 60)
+			{
+				return "You can't put a wall here\nThe center of board must be empty cause it is the winning place!!";
+			}
 			if (pos%11>0 && theboard[pos/11][pos%11-1] == *"O" 
 			&& pos%11<10 && theboard[pos/11][pos%11+1] == *"O")
 			{
@@ -36,13 +54,30 @@ bool player::put_wall(char** theboard, char dir, int pos)
 				theboard[pos/11][pos%11-1] = *"W";
 				theboard[pos/11][pos%11+1] = *"W";
 			}
-			else {return false;}
+			else
+			{
+				if(pos%11==0 || pos%11 ==10)
+				{
+					return "You can't put a wall here\nWalls must be completely in the board!";
+				}
+				else
+				{
+					return "You can't put a wall here\nYou just can put walls in empty cells!";
+				}
+			}
 		}
-		return true;
+		return "OK";
 	}
 	else
 	{
-		return false;
+		if(pos >= 121 || pos <= -1)
+		{
+			return "You can't put a wall here\nThis position is out of the range!\n";
+		}
+		else
+		{
+			return "You can't put a wall here\nYou just can put walls in empty cells!";
+		}
 	}
 	
 }

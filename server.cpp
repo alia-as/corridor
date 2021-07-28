@@ -48,7 +48,7 @@ int main()
     			alls[q].set_name(namee+q);
     			alls[q].set_place(gboard.theboard, place[q]);
     		}
-    		res.set_content("Here is the board\n" + gboard.print_board(), "text/plain");
+    		
     	}
   	});
   	svr.Get("/help", [](const Request& req, Response& res) {
@@ -63,14 +63,7 @@ int main()
       	content_reader([&](const char *data, size_t data_length) {
         body.append(data, data_length);
         auto wallres = alls[0].put_wall(gboard.theboard, body[0], str2int(body.substr(2)));
-        if (wallres)
-        {
-        	res.set_content(gboard.print_board(), "text/plain");
-        }
-        else
-        {
-        	res.set_content("You can't put a wall here\n", "text/plain");
-        }
+        res.set_content(wallres, "text/plain");
         return true;
       	});});
       	svr.Post("/move", [&](const Request &req, Response &res, const ContentReader &content_reader)

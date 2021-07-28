@@ -48,6 +48,8 @@ int main()
 		auto res = cil.Get("/start");
 		cout << res->body << endl;
 	}
+	cout << "Here is the board\n";
+	cout << cil.Get("/print")->body << endl;
 	cout << "And here is the positions of the cells:\n";
 	cout << cil.Get("/pos")->body << endl;
 	int it=0;
@@ -62,10 +64,17 @@ int main()
 		if (action == "wall")
 		{
 			string wallmode = "You can't put a wall here\n";
-			while (wallmode == "You can't put a wall here\n")
+			while (wallmode.substr(0,3) == "You")
 			{
-				cout << "What is the direction of the wall??\nwrite 'h' for horizontal and 'v' for vertical\n";
-				cin >> wall_dir;
+				while(wall_dir != "v" && wall_dir != "h")
+				{
+					cout << "What is the direction of the wall??\nwrite 'h' for horizontal and 'v' for vertical\n";
+					cin >> wall_dir;
+					if (wall_dir != "v" && wall_dir != "h")
+					{
+						cout << "This is not a direction :(\n";
+					}
+				}
 				cout << "what is the position of the wall?\n";
 				cin >> wall_pos;
 				Params params{ { wall_dir , wall_pos}};
@@ -73,6 +82,8 @@ int main()
 				wallmode = res->body;
 				cout << wallmode << endl;
 			}
+			cout << cil.Get("/print")->body << endl;
+			
 		}
 		else if (action == "move")
 		{
