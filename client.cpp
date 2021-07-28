@@ -69,8 +69,7 @@ int main()
 					}
 					cout << "what is the position of the wall?\n";
 					cin >> wall_pos;
-					Params params{ { wall_dir , wall_pos}};
-					auto res = cil.Post("/wall", params);
+					auto res = cil.Post("/wall", wall_dir+wall_pos, "text/plain");
 					wallmode = res->body;
 					cout << wallmode << endl;
 				}
@@ -85,8 +84,7 @@ int main()
 					cout << "Where do you wanna go?\n'u' for up and 'd' for down\n'r' for right and 'l' for left\n";
 					string dirc ;
 					cin >> dirc;
-					Params mp{ {id , dirc}};
-					auto res = cil.Post("/move", mp);
+					auto res = cil.Post("/move", id+dirc, "text/plain");
 					if(res->body == "fail")
 					{
 						cout << "You can't go there!\n";

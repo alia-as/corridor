@@ -129,7 +129,7 @@ int main()
       	content_reader([&](const char *data, size_t data_length) {
         body.append(data, data_length);
         cout << "body: " << body << endl;
-        string result = alls[str2int(body.substr(0,1))-1].go(gboard.theboard, body[2]);
+        string result = alls[str2int(body.substr(0,1))-1].go(gboard.theboard, body[1]);
         res.set_content(  result, "text/plain");
         turn++;
         if(turn > players_count){ turn=1;}
